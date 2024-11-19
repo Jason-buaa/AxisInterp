@@ -9,26 +9,18 @@ Office.onReady((info) => {
   if (info.host === Office.HostType.Excel) {
     document.getElementById("sideload-msg").style.display = "none";
     document.getElementById("app-body").style.display = "flex";
-    document.getElementById("run").onclick = run;
+    document.getElementById("get-table-counts").onclick = get_table_counts;
   }
 });
 
-export async function run() {
+export async function get_table_counts() {
   try {
     await Excel.run(async (context) => {
-      /**
-       * Insert your Excel code here
-       */
-      const range = context.workbook.getSelectedRange();
-
-      // Read the range address
-      range.load("address");
-
-      // Update the fill color
-      range.format.fill.color = "yellow";
-
+      const tables = context.workbook.tables;
+      tables.load('count');
       await context.sync();
-      console.log(`The range address was ${range.address}.`);
+      
+      console.log(tables.count);
     });
   } catch (error) {
     console.error(error);
