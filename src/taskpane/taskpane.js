@@ -17,10 +17,19 @@ export async function get_table_counts() {
   try {
     await Excel.run(async (context) => {
       const tables = context.workbook.tables;
-      tables.load('count');
+      tables.load('count,items');
       await context.sync();
       
       console.log(tables.count);
+      const dropdown = document.getElementById('tableDropdown');
+            
+      // Populate the dropdown
+      tables.items.forEach((table) => {
+          const option = document.createElement('option');
+          option.value = table.name;
+          option.textContent = table.name;
+          dropdown.appendChild(option);
+      });
     });
   } catch (error) {
     console.error(error);
