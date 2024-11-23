@@ -78,3 +78,15 @@
 b {
     font-weight: bold;
 }
+ul {
+    list-style-type: none;
+    padding-left: 20px;
+}
+
+li {
+    margin: 5px 0;
+}
+
+.sheet-name {
+    font-weight: bold;
+}

@@ -16,20 +16,42 @@ Office.onReady((info) => {
 export async function get_table_counts() {
   try {
     await Excel.run(async (context) => {
-      const tables = context.workbook.tables;
-      tables.load('count,items');
-      await context.sync();
-      
-      console.log(tables.count);
-      const dropdown = document.getElementById('tableDropdown');
+        const tables = context.workbook.tables;
+        tables.load('items/name,items/worksheet');
+        await context.sync();
+
+        // Get the table tree container and clear its content
+        const tableTree = document.getElementById('tableTree');
+        tableTree.innerHTML = ''; // Clear existing content
+
+        // Create a dictionary to group tables by worksheet
+        const sheetTableMap = {};
+
+        tables.items.forEach((table) => {
+            const worksheetName = table.worksheet.name;
+            const tableName = table.name;
+
+            if (!sheetTableMap[worksheetName]) {
+                sheetTableMap[worksheetName] = [];
+            }
+            sheetTableMap[worksheetName].push(tableName);
+        });
+
+        // Populate the tree structure
+        for (const [sheetName, tableNames] of Object.entries(sheetTableMap)) {
+            const sheetNode = document.createElement('div');
+            sheetNode.innerHTML = `<span class="sheet-name">${sheetName}</span>`;
             
-      // Populate the dropdown
-      tables.items.forEach((table) => {
-          const option = document.createElement('option');
-          option.value = table.name;
-          option.textContent = table.name;
-          dropdown.appendChild(option);
-      });
+            const tableList = document.createElement('ul');
+            tableNames.forEach((tableName) => {
+                const tableNode = document.createElement('li');
+                tableNode.textContent = tableName;
+                tableList.appendChild(tableNode);
+            });
+
+            sheetNode.appendChild(tableList);
+            tableTree.appendChild(sheetNode);
+        }
     });
   } catch (error) {
     console.error(error);
