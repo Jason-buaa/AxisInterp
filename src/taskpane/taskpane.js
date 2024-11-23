@@ -34,18 +34,39 @@ export async function get_table_counts() {
             if (!sheetTableMap[worksheetName]) {
                 sheetTableMap[worksheetName] = [];
             }
-            sheetTableMap[worksheetName].push(tableName);
+            sheetTableMap[worksheetName].push({
+                name: tableName,
+                worksheet: table.worksheet
+            });
         });
 
         // Populate the tree structure
-        for (const [sheetName, tableNames] of Object.entries(sheetTableMap)) {
+        for (const [sheetName, tables] of Object.entries(sheetTableMap)) {
             const sheetNode = document.createElement('div');
             sheetNode.innerHTML = `<span class="sheet-name">${sheetName}</span>`;
             
             const tableList = document.createElement('ul');
-            tableNames.forEach((tableName) => {
+            tables.forEach(({ name: tableName, worksheet }) => {
                 const tableNode = document.createElement('li');
                 tableNode.textContent = tableName;
+
+                // Add click event to navigate to the table
+                tableNode.style.cursor = 'pointer';
+                tableNode.addEventListener('click', async () => {
+                    try {
+                        await Excel.run(async (context) => {
+                            const sheet = context.workbook.worksheets.getItem(worksheet.name);
+                            const table = sheet.tables.getItem(tableName);
+
+                            // Select the table in Excel
+                            table.getRange().select();
+                            await context.sync();
+                        });
+                    } catch (error) {
+                        console.error(`Failed to navigate to table: ${error}`);
+                    }
+                });
+
                 tableList.appendChild(tableNode);
             });
 
