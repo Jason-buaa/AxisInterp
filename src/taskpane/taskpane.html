@@ -12,7 +12,7 @@
 
     <!-- Office JavaScript API -->
     <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1.1/hosted/office.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.2.0/lib/p5.js"></script>
     <!-- For more information on Fluent UI, visit https://developer.microsoft.com/fluentui#/. -->
     <link rel="stylesheet" href="https://res-1.cdn.office.net/files/fabric-cdn-prod_20230815.002/office-ui-fabric-core/11.1.0/css/fabric.min.css"/>
 
@@ -21,6 +21,19 @@
 </head>
 
 <body class="ms-font-m ms-welcome ms-Fabric">
+    <script>
+        function setup() {
+         
+            // Canvas size 400*400
+            createCanvas(400, 400);
+        }
+           
+        function draw() {
+           
+            // Background color blue
+            background('blue');
+        }
+    </script>
     <header class="ms-welcome__header ms-bgColor-neutralLighter">
         <img width="90" height="90" src="../../assets/logo-filled.png" alt="Contoso" title="Contoso" />
         <h1 class="ms-font-su">Welcome</h1>
