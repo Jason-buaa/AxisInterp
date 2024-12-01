@@ -4,12 +4,13 @@
  */
 
 /* global console, document, Excel, Office */
-
+import * as THREE from 'three';
 Office.onReady((info) => {
   if (info.host === Office.HostType.Excel) {
     document.getElementById("sideload-msg").style.display = "none";
     document.getElementById("app-body").style.display = "flex";
     document.getElementById("get-table-counts").onclick = get_table_counts;
+    document.getElementById("setup_p5").onclick = setup_p5;
   }
 });
 
@@ -26,7 +27,7 @@ export async function get_table_counts() {
 
         // Create a dictionary to group tables by worksheet
         const sheetTableMap = {};
-
+        let l = lerp(0, 10, 0.5); // 结果为 5
         tables.items.forEach((table) => {
             const worksheetName = table.worksheet.name;
             const tableName = table.name;
@@ -77,4 +78,21 @@ export async function get_table_counts() {
   } catch (error) {
     console.error(error);
   }
+}
+function setup_p5()
+{
+  const x = [-2, -1, 0, 1, 2];
+  const y = [4, 1, 0, 1, 4];
+  
+  const resultBuffer = new Float32Array(1);
+  const interpolant = new THREE.LinearInterpolant(x, y, 1, resultBuffer);
+  
+  interpolant.evaluate(1.5);
+  // 0.5
+  console.log(resultBuffer[0]);
+  
+  interpolant.evaluate(1.5);
+  // 2.5
+  console.log(resultBuffer[0]);  
+
 }
