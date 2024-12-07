@@ -10,7 +10,7 @@ Office.onReady((info) => {
     document.getElementById("sideload-msg").style.display = "none";
     document.getElementById("app-body").style.display = "flex";
     document.getElementById("get-table-counts").onclick = get_table_counts;
-    document.getElementById("re-sample").onclick = reSample;
+    document.getElementById("re-sample").onclick = demo_resample;
   }
 });
 
@@ -122,4 +122,85 @@ function reSample()
   // 输出结果
   console.log('Interpolated Table:', finalTable);
   
+}
+
+export async function demo_resample(){
+  try{
+    await Excel.run(async (context) => {
+      // Step 1: 创建一个新的工作表
+      const sheet = context.workbook.worksheets.add("Demo");
+      sheet.activate();
+  
+      // 定义原始数据
+      const xAxis = [1, 3, 5, 7].map(String); // 将 x 轴值转换为字符串
+      const yAxis = [0, 5, 10, 15].map(String); // 将 y 轴值转换为字符串
+      const lookupTable = [
+          [10, 15, 20, 25],
+          [30, 35, 40, 45],
+          [50, 55, 60, 65],
+          [70, 75, 80, 85],
+      ].map(row => row.map(String)); // 将查表值转换为字符串
+  
+      // 创建表格 table_original
+      const tableOriginal = sheet.tables.add(sheet.getRange("A1"), true);
+      tableOriginal.name = "table_original";
+  
+      // 定义表头和添加行
+      tableOriginal.getHeaderRowRange().values = [["Y/X", ...xAxis]]; // 表头
+      tableOriginal.rows.add(null, yAxis.map((y, i) => [y, ...lookupTable[i]]));
+  
+      await context.sync(); // 确保表格创建完成后提取数据
+  
+      // Step 2: 从 table_original 提取数据
+      const originalValues = tableOriginal.getRange().values;
+      const extractedXAxis = originalValues[0].slice(1); // 提取第一行（去掉空单元格）
+      const extractedYAxis = originalValues.slice(1).map(row => row[0]); // 提取第一列（去掉空单元格）
+      const extractedLookupValues = originalValues.slice(1).map(row => row.slice(1)); // 提取查表值
+  
+      // 新的 x 和 y 轴
+      const newXAxis = [1, 2, 4, 6, 7].map(String); // 将新 x 轴值转换为字符串
+      const newYAxis = [0, 6, 12, 15].map(String); // 将新 y 轴值转换为字符串
+  
+      // 工具函数：插值逻辑
+      function interpolateRow(row, xAxis, newX) {
+          const interpolant = new THREE.LinearInterpolant(xAxis.map(Number), row, 1); // 将 x 轴转回数字
+          return newX.map(x => interpolant.evaluate(Number(x))[0]);
+      }
+  
+      function interpolateColumn(column, yAxis, newY) {
+          const interpolant = new THREE.LinearInterpolant(yAxis.map(Number), column, 1); // 将 y 轴转回数字
+          return newY.map(y => interpolant.evaluate(Number(y))[0]);
+      }
+  
+      // 插值计算
+      const interpolatedRows = extractedLookupValues.map(row => interpolateRow(row, extractedXAxis, newXAxis));
+      const interpolatedTable = newYAxis.map(newY => {
+          return newXAxis.map((_, xIndex) => {
+              const column = interpolatedRows.map(row => row[xIndex]); // 提取列数据
+              return interpolateColumn(column, extractedYAxis, [newY])[0];
+          });
+      });
+  
+      // Step 3: 创建 table_new 并插入插值数据
+      const tableNew = sheet.tables.add(sheet.getRange("H1"), true);
+      tableNew.name = "table_new";
+  
+      tableNew.getHeaderRowRange().values = [["Y/X", ...newXAxis]]; // 表头
+      tableNew.rows.add(null, newYAxis.map((y, i) => [y, ...interpolatedTable[i].map(String)])); // 转换为字符串
+  
+      // 自动调整列宽和行高
+      sheet.getUsedRange().format.autofitColumns();
+      sheet.getUsedRange().format.autofitRows();
+  
+      // Step 4: 完成并同步
+      await context.sync();
+      console.log("Table 'table_new' with interpolated data created successfully!");
+  });
+  
+  
+
+  }
+  catch(error){
+    console.error(error);
+  }
 }
