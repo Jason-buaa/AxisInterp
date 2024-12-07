@@ -27,7 +27,6 @@ export async function get_table_counts() {
 
         // Create a dictionary to group tables by worksheet
         const sheetTableMap = {};
-        let l = lerp(0, 10, 0.5); // 结果为 5
         tables.items.forEach((table) => {
             const worksheetName = table.worksheet.name;
             const tableName = table.name;
