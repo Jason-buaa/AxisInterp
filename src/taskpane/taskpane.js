@@ -10,7 +10,7 @@ Office.onReady((info) => {
     document.getElementById("sideload-msg").style.display = "none";
     document.getElementById("app-body").style.display = "flex";
     document.getElementById("get-table-counts").onclick = get_table_counts;
-    document.getElementById("setup_p5").onclick = setup_p5;
+    document.getElementById("re-sample").onclick = reSample;
   }
 });
 
@@ -78,20 +78,48 @@ export async function get_table_counts() {
     console.error(error);
   }
 }
-function setup_p5()
+function reSample()
 {
-  const x = [-2, -1, 0, 1, 2];
-  const y = [4, 1, 0, 1, 4];
-  
-  const resultBuffer = new Float32Array(1);
-  const interpolant = new THREE.LinearInterpolant(x, y, 1, resultBuffer);
-  
-  interpolant.evaluate(1.5);
-  // 0.5
-  console.log(resultBuffer[0]);
-  
-  interpolant.evaluate(1.5);
-  // 2.5
-  console.log(resultBuffer[0]);  
 
+ // 原始数据
+  const xAxis = [1, 3, 5, 7];  // 原始 x 轴点
+  const yAxis = [0, 5, 10, 15]; // 原始 y 轴点
+  const lookupTable = [
+      [10, 15, 20, 25],  // 对应 y=0
+      [30, 35, 40, 45],  // 对应 y=5
+      [50, 55, 60, 65],  // 对应 y=10
+      [70, 75, 80, 85],  // 对应 y=15
+  ];
+  
+  // 新的 x 和 y 轴
+  const newXAxis = [1, 4, 6, 7];  // 新的 x 轴点（数量比原来多）
+  const newYAxis = [0, 9, 15];   // 新的 y 轴点（数量比原来少）
+  
+  // 工具函数：对单行数据在 x 轴方向插值
+  function interpolateRow(row, xAxis, newX) {
+      const interpolant = new THREE.LinearInterpolant(xAxis, row, 1); // 一维插值器
+      return newX.map(x => interpolant.evaluate(x)[0]); // 对新 x 轴上的每个点插值
+  }
+  
+  // 第一步：对每一行插值，生成新表（在新 x 轴上的值）
+  const interpolatedRows = lookupTable.map(row => interpolateRow(row, xAxis, newXAxis));
+  
+  // 工具函数：对列数据在 y 轴方向插值
+  function interpolateColumn(column, yAxis, newY) {
+      const interpolant = new THREE.LinearInterpolant(yAxis, column, 1); // 一维插值器
+      return newY.map(y => interpolant.evaluate(y)[0]); // 对新 y 轴上的每个点插值
+  }
+  
+  // 第二步：对新 x 轴的每列进行插值，生成最终表（在新 y 轴上的值）
+  const finalTable = newYAxis.map(newY => {
+      // 获取对应的新列（逐列插值）
+      return newXAxis.map((_, xIndex) => {
+          const column = interpolatedRows.map(row => row[xIndex]); // 提取原列
+          return interpolateColumn(column, yAxis, [newY])[0]; // 对新 Y 值插值
+      });
+  });
+  
+  // 输出结果
+  console.log('Interpolated Table:', finalTable);
+  
 }
