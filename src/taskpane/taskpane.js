@@ -132,14 +132,14 @@ export async function demo_resample(){
     sheet.activate();
 
     // 定义原始数据
-    const xAxis = [1, 3, 5, 7].map(String); // 将 x 轴值转换为字符串
-    const yAxis = [0, 5, 10, 15].map(String); // 将 y 轴值转换为字符串
+    const xAxis = [1, 3, 5, 7]; // 将 x 轴值转换为字符串
+    const yAxis = [0, 5, 10, 15]; // 将 y 轴值转换为字符串
     const lookupTable = [
         [10, 15, 20, 25],
         [30, 35, 40, 45],
         [50, 55, 60, 65],
         [70, 75, 80, 85],
-    ].map(row => row.map(String)); // 将查表值转换为字符串
+    ]; // 将查表值转换为字符串
 
     // 动态计算表格范围
     const rowCount = yAxis.length + 1; // 行数 = yAxis + 表头
