@@ -142,8 +142,8 @@ export async function demo_resample(){
     ]; // 将查表值转换为字符串
 
     // 动态计算表格范围
-    const rowCount = yAxis.length + 1; // 行数 = yAxis + 表头
     const columnCount = xAxis.length + 1; // 列数 = xAxis + 表头
+    const rowCount = yAxis.length+1;
     const tableRange = sheet.getRangeByIndexes(0, 0, 1, columnCount); // 起始点 (0,0)，动态大小
 
     // 创建 tableOriginal
@@ -158,7 +158,47 @@ export async function demo_resample(){
 
     await context.sync(); // 确保表格创建完成后提取数据
 
-    //console.log(`Table 'table_original' created with range: ${tableRange.address}`);
+    /// Step 2: 提取数据
+    // 获取表头
+    const headerRange = tableOriginal.getHeaderRowRange();
+    headerRange.load("values");
+
+    // 获取表体
+    const bodyRange = tableOriginal.getDataBodyRange();
+    bodyRange.load("values");
+
+    // 获取第一列数据（y 轴）
+    const yAxisColumnRange = tableOriginal.columns.getItemAt(0).getDataBodyRange();
+    yAxisColumnRange.load("values");
+
+    // 获取第一行数据（示例）
+    const firstRowRange = tableOriginal.rows.getItemAt(0);
+    firstRowRange.load("values");
+
+    // 同步以确保数据加载到变量中
+    await context.sync();
+
+    // 提取数据
+    const headerValues = headerRange.values; // 表头数据
+    const bodyValues = bodyRange.values; // 表体数据
+    const yAxisValues = yAxisColumnRange.values; // y 轴数据
+    const firstRowValues = firstRowRange.values; // 第一行数据
+
+    console.log("Header Values:", headerValues);
+    console.log("Body Values:", bodyValues);
+    console.log("Y Axis Values:", yAxisValues);
+    console.log("First Row Values:", firstRowValues);
+
+    // 在工作表中写入提取的数据以供验证
+    sheet.getRange("G1:G1").values = [["Extracted Results"]];
+    sheet.getRange("G2").values = [["Header"]];
+    sheet.getRange("G3:K3").values = headerValues;
+    sheet.getRange("G5").values = [["Body"]];
+    sheet.getRange(`G6:${String.fromCharCode(71 + columnCount - 1)}${5 + rowCount - 1}`).values = bodyValues;
+    sheet.getRange("G12").values = [["Y Axis"]];
+    sheet.getRange(`H12:H${11 + yAxisValues.length}`).values = yAxisValues;
+
+    await context.sync();
     });
   
   
