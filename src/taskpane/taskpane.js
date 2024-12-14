@@ -180,7 +180,8 @@ export async function demo_resample(){
 
     // 提取数据
     const headerValues = headerRange.values; // 表头数据
-    const bodyValues = bodyRange.values; // 表体数据
+    // 剔除表体的第一列数据
+    const bodyValues = bodyRange.values.map(row => row.slice(1)); // 移除每行的第一列
     const yAxisValues = yAxisColumnRange.values; // y 轴数据
     const firstRowValues = firstRowRange.values; // 第一行数据
 
@@ -194,7 +195,7 @@ export async function demo_resample(){
     sheet.getRange("G2").values = [["Header"]];
     sheet.getRange("G3:K3").values = headerValues;
     sheet.getRange("G5").values = [["Body"]];
-    sheet.getRange(`G6:${String.fromCharCode(71 + columnCount - 1)}${5 + rowCount - 1}`).values = bodyValues;
+    sheet.getRange(`H6:${String.fromCharCode(72 + columnCount - 2)}${5 + rowCount - 1}`).values = bodyValues;
     sheet.getRange("G12").values = [["Y Axis"]];
     sheet.getRange(`H12:H${11 + yAxisValues.length}`).values = yAxisValues;
 
