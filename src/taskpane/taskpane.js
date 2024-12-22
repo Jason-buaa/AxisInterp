@@ -215,86 +215,112 @@ export async function resampleNew(){
   try{
     Excel.run(async (context) => {
       const sheet = context.workbook.worksheets.getActiveWorksheet();
-  
-      // 获取当前工作表的所有表格名称
       const tables = sheet.tables.load("items/name");
       await context.sync();
   
-      // 列出表格供用户选择
-      const tableNames = tables.items.map(t => t.name);
-      if (tableNames.length < 2) {
-          console.error("Need at least two tables: original and target.");
-          return;
-      }
-      console.log("Available Tables: ", tableNames);
+      const sourceTableDropdown = document.getElementById("sourceTable");
+      const targetTableDropdown = document.getElementById("targetTable");
+      // 使用 Set 追踪已添加的表名称，避免重复
+      const addedTables = new Set();
+      // 填充下拉菜单
+      tables.items.forEach((table) => {
+        if (!addedTables.has(table.name)) {
+            // 添加到来源表下拉菜单
+            const optionSource = document.createElement("option");
+            optionSource.text = table.name;
+            optionSource.value = table.name;
+            sourceTableDropdown.add(optionSource);
+
+            // 添加到目标表下拉菜单
+            const optionTarget = document.createElement("option");
+            optionTarget.text = table.name;
+            optionTarget.value = table.name;
+            targetTableDropdown.add(optionTarget);
+
+            // 将表名称记录到 Set 中
+            addedTables.add(table.name);
+        }
+    });
   
-      // 手动指定原始和目标表格（也可以通过界面实现）
-      const originalTableName = tableNames[0]; // 假设第一个为原始表格
-      const targetTableName = tableNames[1];   // 假设第二个为目标表格
+      // 监听按钮点击事件
+      document.getElementById("interpolateBtn").addEventListener("click", async () => {
+          const sourceTableName = sourceTableDropdown.value;
+          const targetTableName = targetTableDropdown.value;
   
-      const originalTable = sheet.tables.getItem(originalTableName);
-      const targetTable = sheet.tables.getItem(targetTableName);
+          if (!sourceTableName || !targetTableName) {
+              console.error("Please select both source and target tables.");
+              return;
+          }
   
-      console.log("Selected Original Table: ", originalTableName);
-      console.log("Selected Target Table: ", targetTableName);
-  
-      // 加载原始和目标表格数据
-      const originalHeader = originalTable.getHeaderRowRange().load("values");
-      const originalBody = originalTable.getDataBodyRange().load("values");
-      const targetHeader = targetTable.getHeaderRowRange().load("values");
-      const targetBody = targetTable.getDataBodyRange().load("values");
-  
-      await context.sync();
-  
-      // 提取原始和目标表格的 x/y 轴和查表值
-      const originalX = originalHeader.values[0].slice(1).map(Number);
-      const originalY = originalBody.values.map(row => Number(row[0]));
-      const originalValues = originalBody.values.map(row => row.slice(1).map(Number));
-  
-      const targetX = targetHeader.values[0].slice(1).map(Number);
-      const targetY = targetBody.values.map(row => Number(row[0]));
-  
-      console.log("Original Table - X Axis:", originalX);
-      console.log("Original Table - Y Axis:", originalY);
-      console.log("Target Table - X Axis:", targetX);
-      console.log("Target Table - Y Axis:", targetY);
-  
-      // 工具函数：插值逻辑
-      function interpolateRow(row, xAxis, newX) {
-          const interpolant = new THREE.LinearInterpolant(xAxis.map(Number), row, 1);
-          return newX.map(x => interpolant.evaluate(Number(x))[0]);
-      }
-  
-      function interpolateColumn(column, yAxis, newY) {
-          const interpolant = new THREE.LinearInterpolant(yAxis.map(Number), column, 1);
-          return newY.map(y => interpolant.evaluate(Number(y))[0]);
-      }
-  
-      // Step 1: 对原始表格进行列插值，获取中间插值结果
-      const interpolatedRows = originalValues.map(row => interpolateRow(row, originalX, targetX));
-      console.log("Row Interpolation Result: ", interpolatedRows);
-  
-      // Step 2: 转置插值结果，对每列进行插值
-      const interpolatedColumns = targetX.map((_, colIndex) =>
-          interpolateColumn(interpolatedRows.map(row => row[colIndex]), originalY, targetY)
-      );
-  
-      // Step 3: 转置插值结果，恢复为行方向
-      const finalValues = interpolatedColumns[0].map((_, rowIndex) =>
-          interpolatedColumns.map(column => column[rowIndex])
-      );
-  
-      console.log("Final Interpolated Values: ", finalValues);
-  
-      // 更新目标表格
-      targetBody.values = targetY.map((y, rowIndex) => [y, ...finalValues[rowIndex]]);
-      await context.sync();
-  
-      console.log("Interpolation complete and values updated in target table.");
+          await interpolateTables(sourceTableName, targetTableName);
+      });
   });
   
 }
 catch(error){
   console.error(error);
 }
+}
+
+// 插值函数
+async function interpolateTables(sourceTableName, targetTableName) {
+  await Excel.run(async (context) => {
+      const sheet = context.workbook.worksheets.getActiveWorksheet();
+      const sourceTable = sheet.tables.getItem(sourceTableName);
+      const targetTable = sheet.tables.getItem(targetTableName);
+
+      // 加载表格数据
+      const sourceHeader = sourceTable.getHeaderRowRange().load("values");
+      const sourceBody = sourceTable.getDataBodyRange().load("values");
+      const targetHeader = targetTable.getHeaderRowRange().load("values");
+      const targetBody = targetTable.getDataBodyRange().load("values");
+
+      await context.sync();
+
+      // 提取 x/y 轴和查表值
+      const sourceX = sourceHeader.values[0].slice(1).map(Number);
+      const sourceY = sourceBody.values.map(row => Number(row[0]));
+      const sourceValues = sourceBody.values.map(row => row.slice(1).map(Number));
+
+      const targetX = targetHeader.values[0].slice(1).map(Number);
+      const targetY = targetBody.values.map(row => Number(row[0]));
+
+      console.log("Source Table - X Axis:", sourceX);
+      console.log("Source Table - Y Axis:", sourceY);
+      console.log("Target Table - X Axis:", targetX);
+      console.log("Target Table - Y Axis:", targetY);
+
+      // 工具函数：插值逻辑
+      function interpolateRow(row, xAxis, newX) {
+          const interpolant = new THREE.LinearInterpolant(xAxis.map(Number), row, 1);
+          return newX.map(x => interpolant.evaluate(Number(x))[0]);
+      }
+
+      function interpolateColumn(column, yAxis, newY) {
+          const interpolant = new THREE.LinearInterpolant(yAxis.map(Number), column, 1);
+          return newY.map(y => interpolant.evaluate(Number(y))[0]);
+      }
+
+      // Step 1: 对原始表格进行列插值，获取中间插值结果
+      const interpolatedRows = sourceValues.map(row => interpolateRow(row, sourceX, targetX));
+      console.log("Row Interpolation Result: ", interpolatedRows);
+
+      // Step 2: 转置插值结果，对每列进行插值
+      const interpolatedColumns = targetX.map((_, colIndex) =>
+          interpolateColumn(interpolatedRows.map(row => row[colIndex]), sourceY, targetY)
+      );
+
+      // Step 3: 转置插值结果，恢复为行方向
+      const finalValues = interpolatedColumns[0].map((_, rowIndex) =>
+          interpolatedColumns.map(column => column[rowIndex])
+      );
+
+      console.log("Final Interpolated Values: ", finalValues);
+
+      // 更新目标表格
+      targetBody.values = targetY.map((y, rowIndex) => [y, ...finalValues[rowIndex]]);
+      await context.sync();
+
+      console.log("Interpolation complete and values updated in target table.");
+  });
 }

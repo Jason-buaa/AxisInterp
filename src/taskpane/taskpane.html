@@ -50,9 +50,20 @@
         <div role="button" id="setup-sample" class="ms-welcome__action ms-Button ms-Button--hero ms-font-xl">
             <span class="ms-Button-label">创建模板</span>
         </div>
-        <div role="button" id="re-sample" class="ms-welcome__action ms-Button ms-Button--hero ms-font-xl">
-            <span class="ms-Button-label">重新采样</span>
-        </div>
+        <section>
+            <div role="button" id="re-sample" class="ms-welcome__action ms-Button ms-Button--hero ms-font-xl">
+                <span class="ms-Button-label">开始重新采样</span>
+            </div>
+            <h2>Table Interpolation</h2>
+            <label for="sourceTable">Select Source Table:</label>
+            <select id="sourceTable"></select>
+            <br><br>
+            <label for="targetTable">Select Target Table:</label>
+            <select id="targetTable"></select>
+            <br><br>
+            <button id="interpolateBtn">Start Interpolation</button>   
+
+        </section>
         <p><label id="item-subject"></label></p>
         <div id="tableTree"></div>
     </main>
