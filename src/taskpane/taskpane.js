@@ -10,6 +10,7 @@ Office.onReady((info) => {
     document.getElementById("sideload-msg").style.display = "none";
     document.getElementById("app-body").style.display = "flex";
     document.getElementById("get-table-counts").onclick = get_table_counts;
+    document.getElementById("setup-sample").onclick = demo_resample;
     document.getElementById("re-sample").onclick = resampleNew;
   }
 });
