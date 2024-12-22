@@ -57,16 +57,26 @@
                 <span class="ms-Button-label">开始重新采样</span>
             </div>
             <h2>Table Interpolation</h2>
-            <label for="sourceTable">Select Source Table:</label>
-            <select id="sourceTable"></select>
+            <label  class="ms-Label" for="sourceTable">Select Source Table:</label>
+            <select class="ms-Dropdown-select" id="sourceTable"></select>
             <br><br>
-            <label for="targetTable">Select Target Table:</label>
-            <select id="targetTable"></select>
+            <label  class="ms-Label" for="targetTable">Select Target Table:</label>
+            <select class="ms-Dropdown-select" id="targetTable"></select>
             <br><br>
-            <button id="interpolateBtn">Start Interpolation</button>   
+            <button type="button" class="ms-welcome__action ms-Button ms-Button--hero ms-font-xl" id="interpolateBtn">Start Interpolation</button>   
 
         </section>
-
+        <div class="ms-Dropdown" tabindex="0">
+            <label class="ms-Label">Dropdown label</label>
+            <i class="ms-Dropdown-caretDown ms-Icon ms-Icon--ChevronDown"></i>
+            <select class="ms-Dropdown-select">
+              <option>Choose a sound&amp;hellip;</option>
+              <option>Dog barking</option>
+              <option>Wind blowing</option>
+              <option>Duck quacking</option>
+              <option>Cow mooing</option>
+            </select>
+          </div>
     </main>
 </body>
 
