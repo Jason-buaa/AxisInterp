@@ -109,6 +109,8 @@ export async function resample(){
   
       const sourceTableDropdown = document.getElementById("sourceTable");
       const targetTableDropdown = document.getElementById("targetTable");
+      sourceTableDropdown.innerHTML = "";
+      targetTableDropdown.innerHTML = "";
       // 使用 Set 追踪已添加的表名称，避免重复
       const addedTables = new Set();
       // 填充下拉菜单
