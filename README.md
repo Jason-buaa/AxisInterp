@@ -13,3 +13,7 @@
 [图标库](https://developer.microsoft.com/en-us/fluentui#/styles/web/icons#available-icons)
 
 [发布使用 Visual Studio Code 开发的加载项](https://learn.microsoft.com/zh-cn/office/dev/add-ins/publish/publish-add-in-vs-code)
+
+# 参考资料
+
+[使用VS Code开发加载项](https://learn.microsoft.com/zh-cn/office/dev/add-ins/develop/development-kit-overview?tabs=vscode)
