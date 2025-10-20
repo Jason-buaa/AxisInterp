@@ -17,3 +17,5 @@
 # 参考资料
 
 [使用VS Code开发加载项](https://learn.microsoft.com/zh-cn/office/dev/add-ins/develop/development-kit-overview?tabs=vscode)
+
+Keep MS365 alive.
